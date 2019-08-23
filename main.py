@@ -18,7 +18,7 @@ for i in range(1, 2):
         if(re.findall(r"DEPOT_SECTION", line)):
             demand_section = False
             depot_section = True
-            continue
+            continue 
 
         if(re.findall(r"CAPACITY", line) 
         or re.findall(r"DISTANCE", line)
