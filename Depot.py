@@ -1,6 +1,7 @@
 from Point2D  import *
 from Customer import *
 from Vehicle  import *
+import random
 
 false = False
 true  = True
@@ -10,19 +11,24 @@ class Depot:
     pos = []
 
     vehicles = []
+    # Usada para calcular as rotas
     customers = []
+    # Usada para reservar os clientes
+    _customers = []
     _distMatrix = []
 
     def __init__(self, pos, vehicles, cap):
-    
+        
+        self.unloaded = false
         self.pos = pos
         self.vehicles = self.createVehicles(int(vehicles), int(cap))
     
     def createVehicles(self, amount, cap):
         print("Creating vehicles.. \n")
         vehicles = []
+
         for i in range (0, amount):
-            vehicles.append(Vehicle(i, cap))
+            vehicles.append(Vehicle(i, cap, self.pos))
         
         print(str(amount)+" Vehicles created.\n")
         return vehicles
@@ -30,6 +36,7 @@ class Depot:
 
     def addCustomer(self, customer):
         self.customers.append(customer)
+        self._customers.append(customer)
 
     def bulkAddCustomer(self, dataset):
         print("Bulk adding customers..\n")
@@ -41,23 +48,66 @@ class Depot:
             i = i+1
 
         print(str(i)+" Customers added. \n")
-
+        self.customers[0].unload()
+        self._createDistancMatrix()
 
     def removeCustomer(self, customer):
         return false
 
     def traceRoutes(self):
+        print("Tracing routes..")
+        i = 0
+        for i in range (0, self._distMatrix[i].__len__()):
+        # for i in range (0, 1):
+            for v in self.vehicles:
+                _next = self._getMinorDistanceIndex(v.pos)
+                if(v.addCustomer(self.customers[_next[0]], _next[1])):
+                    self.customers[_next[0]].unload()
+
+               
+        print(self.vehicles)
+
+        print("Routes traced.")
+        
         return false
 
-    def createDistancMatrix(self):
+    def _getMinorDistanceIndex(self, curPos):
+        _next = 9999
+        _idx = 0
+        i = 0
+        for d in self._distMatrix[curPos]:
+            if(d > 0 and d < _next and self.customers[i].loaded):
+                _next = d
+                _idx = i
+            i += 1
+
+        _result = []
+        _result.append(_idx)
+        _result.append(_next)
+        
+        return _result
+
+    def _randomizeResult(self, curPos, seed):
+        random.seed(seed)
+        _idx = _next = 0
+        while((_idx == 0 or _next == -1 or _next == 0) and not self.customers[_idx].loaded):
+            _idx = int(random.randint(1, self._distMatrix[_idx].__len__() - 1))
+            _next = self._distMatrix[curPos][_idx]
+
+        _result = []
+        _result.append(_idx)
+        _result.append(_next)
+
+        return _result
+
+    def _createDistancMatrix(self):
         print("Creating distance matrix..\n")
-        d_matrix = []
         i = j = 0
         for customer in self.customers:
+            d_matrix = []
             for next_c in self.customers:
                 dist = customer.pos.distanceTo(next_c.pos)
-                d_matrix.append(dist)
-
+                d_matrix.append(int(dist))
             
             self._distMatrix.append(d_matrix)
         print("Distance matrix created.\n")
@@ -74,3 +124,23 @@ class Depot:
         for item in self._distMatrix:
             print(item)
             print("\n")
+
+    def reportLoadedUnloaded(self):
+        loaded = -1;
+        unloaded = []
+        for c in self.customers:
+            loaded += 1 if not c.loaded else 0
+            if(c.loaded):
+                unloaded.append(c)
+        
+        print(" Unloaded customers: " + str(loaded))
+        print(" Total customers: " + str(self.customers.__len__()-1))
+        if(unloaded.__len__() > 0):
+            print(" Missing customers: ")
+            print(unloaded)
+            self.unloaded = true
+        else:
+            self.unloaded = false
+
+        return unloaded.__len__() == 0
+        
