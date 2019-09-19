@@ -40,7 +40,7 @@ class Depot:
 
     def bulkAddCustomer(self, dataset):
         print("Bulk adding customers..\n")
-        i = 0;
+        i = 0
         for item in dataset:
             pos = Point2D(float(item[0]), float(item[1]))
             demand = int(item[2])
@@ -54,28 +54,43 @@ class Depot:
     def removeCustomer(self, customer):
         return false
 
-    def traceRoutes(self):
+    def traceRoutes(self, k):
         print("Tracing routes..")
         i = 0
+        k = k+1
         for i in range (0, self._distMatrix[i].__len__()):
         # for i in range (0, 1):
             for v in self.vehicles:
-                _next = self._getMinorDistanceIndex(v.pos)
+                _next = self._getMinorDistanceIndex(v.pos,4)
                 if(v.addCustomer(self.customers[_next[0]], _next[1])):
                     self.customers[_next[0]].unload()
 
                
         print(self.vehicles)
-
         print("Routes traced.")
-        
-        return false
 
-    def _getMinorDistanceIndex(self, curPos):
+        # isDone = self.reportLoadedUnloaded()
+        # if(not isDone):
+        #     self.traceRoutes(k)
+        return false
+        
+        #return false
+
+    def _getMinorDistanceIndex(self, curPos, k):
         _next = 9999
         _idx = 0
         i = 0
-        for d in self._distMatrix[curPos]:
+        testRow = []
+        if(k != 0 and k <self._distMatrix[curPos].__len__()):
+            row = []
+            row = list(self._distMatrix[curPos])
+            val = self._distMatrix[curPos][k]
+            row.insert(0, val)
+            row.__delitem__(k+1)
+            testRow = row
+            print("linha" + str(row))
+            print("valor " + str(k), "é : " + str(val))
+        for d in testRow:
             if(d > 0 and d < _next and self.customers[i].loaded):
                 _next = d
                 _idx = i
@@ -126,7 +141,7 @@ class Depot:
             print("\n")
 
     def reportLoadedUnloaded(self):
-        loaded = -1;
+        loaded = -1
         unloaded = []
         for c in self.customers:
             loaded += 1 if not c.loaded else 0
