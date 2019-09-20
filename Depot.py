@@ -2,6 +2,7 @@ from Point2D  import *
 from Customer import *
 from Vehicle  import *
 import random
+import time
 
 false = False
 true  = True
@@ -16,6 +17,8 @@ class Depot:
     # Usada para reservar os clientes
     _customers = []
     _distMatrix = []
+    timeConst = 0
+    timeRef1 = 0
     def __init__(self, pos, vehicles, cap):
         
         self.unloaded = false
@@ -83,7 +86,7 @@ class Depot:
             distanceParcial += distanceVolta
             #i = i + 1
         print("\nDistância total da solução: \n" + str(distanceParcial) + '\n')
-
+        print("Tempo de execução com a heurística construtiva: " + str(self.timeConst) + '\n')
         #se for escolhido usar o método de refinamento de trocas...
         if(ref == 1):
             #print("entrou no refinamento")
@@ -105,6 +108,8 @@ class Depot:
             print(self.vehicles)
             print("\nRoutes traced.")
             print("Distância total da solução após refinamento: " + str(distanceParcial) +'\n')
+            print("Tempo de execução com a heurística refinamento: " + str(self.timeRef1) +'\n')
+
             
 
         #isDone = self.reportLoadedUnloaded()
@@ -115,6 +120,7 @@ class Depot:
         #return false
 
     def _getMinorDistanceIndex(self, curPos, k):
+        timeStart = time.time()
         _next = 9999
         _idx = 0
         i = 0
@@ -137,6 +143,9 @@ class Depot:
         _result = []
         _result.append(_idx)
         _result.append(_next)
+
+        timeEnd = time.time()
+        self.timeConst += timeEnd - timeStart
         
         return _result
 
@@ -154,6 +163,7 @@ class Depot:
         return _result
 
     def _changeRefine(self):
+        timeStart = time.time()
         i = 0
         _midx = []
         _idx = 0
@@ -198,6 +208,8 @@ class Depot:
             self.vehicles.insert(_midx[i], worstRoutes[i])
             self.vehicles.__delitem__(_midx[i]+1)
 
+        timeEnd = time.time()
+        self.timeRef1 = timeEnd - timeStart
         # print("valor novo da distRan 0: " + str(worstRoutes[0].distRan))
         # print("valor novo da distRan 1: " + str(worstRoutes[1].distRan))
         # worstRoutes[0].removeCustomer(0)
