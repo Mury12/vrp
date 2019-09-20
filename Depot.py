@@ -3,10 +3,10 @@ from Customer import *
 from Vehicle  import *
 import random
 import time
+import math
 
 false = False
 true  = True
-
 class Depot:
     
     pos = []
@@ -89,7 +89,8 @@ class Depot:
 
         if(ref == 1):
             #print("entrou no refinamento")
-            self._changeRefine()
+            self._changeRefine(4,10) #alterar aq o envio da optimization rate and seed (seria bom um dps 
+            #colocarmos um input())
             distanceParcial = 0
             for v in self.vehicles:
                 distanceParcial += v.getTotalDistance() #soma a distancia percorrido pelo veiculo
@@ -149,14 +150,15 @@ class Depot:
 
         return _result
 
-    def _changeRefine(self):
+    def _changeRefine(self, ot, seed):
+        random.seed(seed)
         timeStart = time.time() #time start do método de refinamento
         i = 0 #Optimization rates = Quantidade de veículos q serão refinados (os veículos q percorrem maior distância)
         _midx = [] #list q armazena o indice real dos veículos em self.vehicles
         _idx = 0 #indice q identifica o veiculo q passou apresentar ter maior distancia percorrida (pior)
         cloneVehicles = self.vehicles
         worstRoutes = [] #list q armazena os piores veiculos
-        while i < 2: #para a qtde veiculos q deverá ser refeito
+        while i < ot: #para a qtde veiculos q deverá ser refeito
             j = 0
             _next = 0
             for v in cloneVehicles:
@@ -173,11 +175,11 @@ class Depot:
         for c in worstRoutes:
             for w in range (0,int(c.route.__len__()/2)):
                 customer1 = c.route[w]
-                customer2 = c.route[w%(c.route.__len__()-1)]
+                customer2 = c.route[abs(random.randint(0, int(c.route.__len__()-2)))]
                 c.route.insert(w, customer2)
                 c.route.__delitem__(w+1)
                 c.route.insert(w%3, customer1)
-                c.route.__delitem__((w%c.route.__len__()-1) + 1)
+                c.route.__delitem__(abs((random.randint(0, int(c.route.__len__()-2)))) + 1)
             c.distRan = self._recalcDistanc(c)
         
         sum = 0 #soma da distancia total com o refinamento das piores rotas
