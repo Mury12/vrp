@@ -25,11 +25,9 @@ class Vehicle:
                 return True
         return False
     
-    def removeCustomer(self, customer):
-        i = 0
-
-        
-        return False
+    def removeCustomer(self, idxCustomer):
+        self.route.__delitem__(idxCustomer)
+        # return False
  
 
     def getTotalDistance(self):

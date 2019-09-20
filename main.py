@@ -19,8 +19,8 @@ depot = Depot(
 )
 depot.bulkAddCustomer(dataset)
 
-
-isDone = depot.traceRoutes(0)
+# k and refineMethod
+isDone = depot.traceRoutes(1)
 # print(depot.vehicles[0].route)
 # print(depot.vehicles[1].route)
 
@@ -30,5 +30,7 @@ if(not isDone):
     print("There is missing customers. Result needs to be optimized.\n")
     for line in depot._distMatrix:
         print(line)
+for v in range(0, depot.vehicles.__len__()):
+    print("\nVeículo " + str(v) + str(depot.vehicles[v].route) + '\n')
 
 

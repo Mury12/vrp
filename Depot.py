@@ -16,7 +16,6 @@ class Depot:
     # Usada para reservar os clientes
     _customers = []
     _distMatrix = []
-
     def __init__(self, pos, vehicles, cap):
         
         self.unloaded = false
@@ -54,10 +53,10 @@ class Depot:
     def removeCustomer(self, customer):
         return false
 
-    def traceRoutes(self, k):
+    def traceRoutes(self, ref):
         print("Tracing routes..")
         i = 0
-        k = k+1
+        #k = k if k > 0 else k + 1
         for i in range (0, self._distMatrix[i].__len__()):
         # for i in range (0, 1):
             for v in self.vehicles:
@@ -67,11 +66,50 @@ class Depot:
 
                
         print(self.vehicles)
-        print("Routes traced.")
+        print("Routes traced.\n")
 
-        # isDone = self.reportLoadedUnloaded()
-        # if(not isDone):
-        #     self.traceRoutes(k)
+        i = 0
+        distanceParcial = 0
+        for v in self.vehicles:
+            #print("Vehicle: " + str(i) + str(v.route))
+            #distancia percorrida pelo veiculo na rota obs.: sem contar a volta ao depot
+            distanceParcial += v.getTotalDistance()
+            #print("rota " + str(i) + " distancia: " + str(distanceParcial))
+            #obtem distancia para voltar ao depot
+            distanceVolta = v.route[-1][0].pos.distanceTo(Point2D(float(self.pos.x),float(self.pos.y)))
+            #print("Distancia de volta " + str(distanceVolta))
+            #acrescenta a distancia de volta à distância percorrida pelo veículo v (que resulta na 
+            # distancia total da solução)
+            distanceParcial += distanceVolta
+            #i = i + 1
+        print("\nDistância total da solução: \n" + str(distanceParcial) + '\n')
+
+        #se for escolhido usar o método de refinamento de trocas...
+        if(ref == 1):
+            #print("entrou no refinamento")
+            self._changeRefine()
+            distanceParcial = 0
+            for v in self.vehicles:
+                #print("Vehicle: " + str(i) + str(v.route))
+                #distancia percorrida pelo veiculo na rota obs.: sem contar a volta ao depot
+                distanceParcial += v.getTotalDistance()
+                #print("rota " + str(i) + " distancia: " + str(distanceParcial))
+                #obtem distancia para voltar ao depot
+                distanceVolta = v.route[-1][0].pos.distanceTo(Point2D(float(self.pos.x),float(self.pos.y)))
+                #print("Distancia de volta " + str(distanceVolta))
+                #acrescenta a distancia de volta à distância percorrida pelo veículo v (que resulta na 
+                # distancia total da solução)
+                distanceParcial += distanceVolta
+                #i = i + 1
+            print("\nNew routes traceds...\n")
+            print(self.vehicles)
+            print("\nRoutes traced.")
+            print("Distância total da solução após refinamento: " + str(distanceParcial) +'\n')
+            
+
+        #isDone = self.reportLoadedUnloaded()
+        #if(not isDone):
+        #    self.traceRoutes(k)
         return false
         
         #return false
@@ -88,8 +126,8 @@ class Depot:
             row.insert(0, val)
             row.__delitem__(k+1)
             testRow = row
-            print("linha" + str(row))
-            print("valor " + str(k), "é : " + str(val))
+            #print("linha" + str(row))
+            #print("valor " + str(k), "é : " + str(val))
         for d in testRow:
             if(d > 0 and d < _next and self.customers[i].loaded):
                 _next = d
@@ -114,6 +152,73 @@ class Depot:
         _result.append(_next)
 
         return _result
+
+    def _changeRefine(self):
+        i = 0
+        _midx = []
+        _idx = 0
+        cloneVehicles = self.vehicles
+        worstRoutes = []
+        ans = []
+        while i < 8:
+            j = 0
+            _next = 0
+            for v in cloneVehicles:
+                if v.distRan > _next:
+                    _next = v.distRan
+                    _idx = j
+                j += 1
+            _midx.append(_idx)
+            worstRoutes.append(cloneVehicles[_idx])
+            cloneVehicles[_idx].distRan = 0
+            #cloneVehicles.__delitem__(_idx)
+            #print("pior rota: " + str(worstRoutes))
+            i += 1
+        #print("valor antigo da rota 0: " + str(worstRoutes[0].distRan))
+        for c in worstRoutes:
+            for w in range (0,int(c.route.__len__()/2)):
+                #print("entrada route  " + str(c.route))
+                customer1 = c.route[w]
+                customer2 = c.route[w%(c.route.__len__()-1)]
+                c.route.insert(w, customer2)
+                c.route.__delitem__(w+1)
+                c.route.insert(w%3, customer1)
+                c.route.__delitem__((w%c.route.__len__()-1) + 1)
+            #print("saida route : " + str(c.route))
+            ans = self._recalcDistanc(c)
+            c.distRan = ans
+        
+        sum = 0
+        for c in worstRoutes:
+            print(c.distRan)
+            sum += c.distRan
+        
+        print("Soma da distância total das rotas que foram refinadas -> " + str(sum))
+        for i in range (0,_midx.__len__()):
+            self.vehicles.insert(_midx[i], worstRoutes[i])
+            self.vehicles.__delitem__(_midx[i]+1)
+
+        # print("valor novo da distRan 0: " + str(worstRoutes[0].distRan))
+        # print("valor novo da distRan 1: " + str(worstRoutes[1].distRan))
+        # worstRoutes[0].removeCustomer(0)
+        #print(worstRoutes[0].route)
+
+        
+    def _recalcDistanc(self, vec):
+        newDistRan = 0
+        for c in range(0, vec.route.__len__() -1 ):
+            if c <= (vec.route.__len__()):
+                cActual = str(vec.route[c]).split('(')[1].split(')')[0].split(',')
+                cNext  = str(vec.route[c+1]).split('(')[1].split(')')[0].split(',')
+                pointActual = Point2D(float(cActual[0]), float(cActual[1]))
+                pointNext = Point2D(float(cNext[0]), float(cNext[1]))
+                #print(pointNext)
+                newDistRan += self.distanceBetween(pointActual, pointNext)
+        #print("distancia da nova rota: " + str(newDistRan))
+        return newDistRan
+
+    def distanceBetween(self, actual, next):
+        return math.sqrt( (next.x - actual.x) ** 2 + (next.y - actual.y) ** 2 )
 
     def _createDistancMatrix(self):
         print("Creating distance matrix..\n")
