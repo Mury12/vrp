@@ -89,7 +89,7 @@ class Depot:
 
         if(ref == 1):
             #print("entrou no refinamento")
-            self._changeRefine(4,10) #alterar aq o envio da optimization rate and seed (seria bom um dps 
+            self._changeRefine(4,100) #alterar aq o envio da optimization rate and seed (seria bom um dps 
             #colocarmos um input())
             distanceParcial = 0
             for v in self.vehicles:
