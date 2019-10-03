@@ -1,12 +1,13 @@
 from Point2D  import *
 from Customer import *
 from Vehicle  import *
-import random
+from random import *
 import time
 import math
 
 false = False
 true  = True
+
 class Depot:
     
     pos = []
@@ -89,7 +90,7 @@ class Depot:
 
         if(ref == 1):
             #print("entrou no refinamento")
-            self._changeRefine(4,100) #alterar aq o envio da optimization rate and seed (seria bom um dps 
+            self._changeRefine(4) #alterar aq o envio da optimization rate and seed (seria bom um dps 
             #colocarmos um input())
             distanceParcial = 0
             for v in self.vehicles:
@@ -150,8 +151,7 @@ class Depot:
 
         return _result
 
-    def _changeRefine(self, ot, seed):
-        random.seed(seed)
+    def _changeRefine(self, ot):
         timeStart = time.time() #time start do método de refinamento
         i = 0 #Optimization rates = Quantidade de veículos q serão refinados (os veículos q percorrem maior distância)
         _midx = [] #list q armazena o indice real dos veículos em self.vehicles
@@ -174,12 +174,13 @@ class Depot:
         
         for c in worstRoutes:
             for w in range (0,int(c.route.__len__()/2)):
+                x = randint(0, c.route.__len__()-1)
                 customer1 = c.route[w]
-                customer2 = c.route[abs(random.randint(0, int(c.route.__len__()-2)))]
+                customer2 = c.route[x]
                 c.route.insert(w, customer2)
                 c.route.__delitem__(w+1)
-                c.route.insert(w%3, customer1)
-                c.route.__delitem__(abs((random.randint(0, int(c.route.__len__()-2)))) + 1)
+                c.route.insert(x, customer1)
+                c.route.__delitem__(x+1)
             c.distRan = self._recalcDistanc(c)
         
         sum = 0 #soma da distancia total com o refinamento das piores rotas
@@ -235,7 +236,7 @@ class Depot:
             print("\n")
 
     def reportLoadedUnloaded(self):
-        loaded = -1
+        '''loaded = -1
         unloaded = []
         for c in self.customers:
             loaded += 1 if not c.loaded else 0
@@ -249,7 +250,7 @@ class Depot:
             print(unloaded)
             self.unloaded = true
         else:
-            self.unloaded = false
+            self.unloaded = false'''
 
-        return unloaded.__len__() == 0
+        return self.vehicles
         
