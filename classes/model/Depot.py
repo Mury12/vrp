@@ -1,6 +1,6 @@
-from Point2D  import *
-from Customer import *
-from Vehicle  import *
+from classes.model.Point2D import *
+from classes.model.Customer import *
+from classes.model.Vehicle import *
 from random import *
 import time
 import math
@@ -27,13 +27,13 @@ class Depot:
         self.vehicles = self.createVehicles(int(vehicles), int(cap))
     
     def createVehicles(self, amount, cap):
-        print("Creating vehicles.. \n")
+        #print("Creating vehicles.. \n")
         vehicles = []
 
         for i in range (0, amount):
             vehicles.append(Vehicle(i, cap, self.pos))
         
-        print(str(amount)+" Vehicles created.\n")
+        #print(str(amount)+" Vehicles created.\n")
         return vehicles
 
 
@@ -42,7 +42,7 @@ class Depot:
         self._customers.append(customer)
 
     def bulkAddCustomer(self, dataset):
-        print("Bulk adding customers..\n")
+        #print("Bulk adding customers..\n")
         i = 0
         for item in dataset:
             pos = Point2D(float(item[0]), float(item[1]))
@@ -50,7 +50,7 @@ class Depot:
             self.addCustomer(Customer(i, pos, demand))
             i = i+1
 
-        print(str(i)+" Customers added. \n")
+        #print(str(i)+" Customers added. \n")
         self.customers[0].unload()
         self._createDistancMatrix()
 
@@ -58,7 +58,7 @@ class Depot:
         return false
 
     def traceRoutes(self, ref):
-        print("Tracing routes..")
+        #print("Tracing routes..")
         i = 0
         #k = k if k > 0 else k + 1
         for i in range (0, self._distMatrix[i].__len__()):
@@ -69,8 +69,8 @@ class Depot:
                     self.customers[_next[0]].unload()
 
                
-        print(self.vehicles)
-        print("Routes traced.\n")
+        #print(self.vehicles)
+        #print("Routes traced.\n")
 
         distanceParcial = 0
         for v in self.vehicles:
@@ -78,8 +78,8 @@ class Depot:
             #soma a distancia de volta do veiculo para o depot a partir do ultimo cliente
             distanceVolta = v.route[-1][0].pos.distanceTo(Point2D(float(self.pos.x),float(self.pos.y)))
             distanceParcial += distanceVolta
-        print("\nDistância total da solução: \n" + str(distanceParcial) + '\n')
-        print("Tempo de execução com a heurística construtiva: " + str(self.timeConst) + '\n')
+        #print("\nDistância total da solução: \n" + str(distanceParcial) + '\n')
+        #print("Tempo de execução com a heurística construtiva: " + str(self.timeConst) + '\n')
         #se for escolhido usar o método de refinamento de trocas...
 
         #verifica se existe uma solução para o problema, caso n exista o k é iterado e o programa 
@@ -98,11 +98,11 @@ class Depot:
                 #soma a distancia de volta do veiculo para o depot a partir do ultimo cliente 
                 distanceVolta = v.route[-1][0].pos.distanceTo(Point2D(float(self.pos.x),float(self.pos.y)))
                 distanceParcial += distanceVolta
-            print("\nNew routes traceds...\n")
+            '''print("\nNew routes traceds...\n")
             print(self.vehicles)
-            print("\nRoutes traced.")
-            print("Distância total da solução após refinamento: " + str(distanceParcial) +'\n')
-            print("Tempo de execução com a heurística refinamento: " + str(self.timeRef1) +'\n')
+            print("\nRoutes traced.")'''
+            print(str(distanceParcial))
+            #print("Tempo de execução com a heurística refinamento: " + str(self.timeRef1) +'\n')
 
         return false
         
@@ -185,10 +185,10 @@ class Depot:
         
         sum = 0 #soma da distancia total com o refinamento das piores rotas
         for c in worstRoutes:
-            print(c.distRan)
+            #print(c.distRan)
             sum += c.distRan
         
-        print("Soma da distância total das rotas que foram refinadas -> " + str(sum))
+        #print("Soma da distância total das rotas que foram refinadas -> " + str(sum))
         for i in range (0,_midx.__len__()):
             self.vehicles[_midx[i]].distRan = worstRoutes[i].distRan #atualiza o distRan da pior rota 
             #self.vehicles.insert(_midx[i], worstRoutes[i])
@@ -211,7 +211,7 @@ class Depot:
         return math.sqrt( (next.x - actual.x) ** 2 + (next.y - actual.y) ** 2 )
 
     def _createDistancMatrix(self):
-        print("Creating distance matrix..\n")
+        #print("Creating distance matrix..\n")
         i = j = 0
         for customer in self.customers:
             d_matrix = []
@@ -220,7 +220,7 @@ class Depot:
                 d_matrix.append(int(dist))
             
             self._distMatrix.append(d_matrix)
-        print("Distance matrix created.\n")
+        #print("Distance matrix created.\n")
 
     def showVehicles(self):
         for truck in self.vehicles:

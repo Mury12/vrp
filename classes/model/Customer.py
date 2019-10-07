@@ -1,4 +1,4 @@
-from Point2D  import *
+from classes.model.Point2D  import *
 
 class Customer:
 

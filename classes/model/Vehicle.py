@@ -1,5 +1,5 @@
-from Point2D  import *
-from Customer import *
+from classes.model.Point2D  import *
+from classes.model.Customer import *
 
 class Vehicle:
     
