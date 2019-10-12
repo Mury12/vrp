@@ -1,53 +1,77 @@
-import re
 
-i = 0
-rows = []
-node_section = False
-demand_section = False
-depot_section = False
-for i in range(1, 2):
-    f = open('plain/fixed'+str(i)+'.txt', 'r')
-    for line in f:
-        if(re.findall(r"NODE_COORD_SECTION", line)):
-            node_section = True
-            continue
-        if(re.findall(r"DEMAND_SECTION", line)):
-            node_section = False
-            demand_section = True
-            continue
-        if(re.findall(r"DEPOT_SECTION", line)):
-            demand_section = False
-            depot_section = True
-            continue
+import sys
+from classes.model.Parser import *
+from classes.model.Depot import *
+from classes.model.Solver import *
+parser = Parser()
+# parser.parse()
+i=0
+sol = []
 
-        if(re.findall(r"CAPACITY", line) 
-        or re.findall(r"DISTANCE", line)
-        or re.findall(r"VEHICLES", line)):
-            _f = open('plain/ready/fixed'+str(i)+'.txt', 'a')
-            _f.write(line)
-            _f.close()
-        
-        if(node_section):
-            row = line.split()
-            row.pop(0)
-            rows.append(row)
-        
-        if(demand_section):
-            row = line.split()
-            idx = row[0]
-            row.pop(0)
-            #print(row)
-            rows[int(idx)-1].append(row[0])
-        if(depot_section):
-            _f = open('plain/ready/fixed'+str(i)+'.txt', 'a')
-            depot = line.split()
-            depot.append(0)
-            _f.write(" ".join(str(el) for el in depot) + '\n')
-            _f.close()
-            break
-    for row in rows:
-        _f = open('plain/ready/fixed'+str(i)+'.txt', 'a')
-        _f.write(" ".join(str(el) for el in row) + '\n')
-        _f.close()   
+i = sys.argv[1]
 
-    f.close()
+dataset = parser.fileToMatrix(1)
+
+
+seed(i)
+
+maxCap = dataset.pop(0)
+vehicles = dataset.pop(0)
+depotPos = dataset[0]
+
+#print(depotPos[0], depotPos[1])
+
+depot = Depot(
+        Point2D(depotPos[0], depotPos[1]),
+        vehicles[0],
+        maxCap[0]
+)
+
+depot.bulkAddCustomer(dataset)
+
+# k and refineMethod
+# isDone = depot.traceRoutes(1)
+# print(depot.vehicles[0].route)
+# print(depot.vehicles[1].route)
+k = 0 
+global_optimal = 99999
+best_skip = 0
+for k in range (2, dataset.__len__()-1):
+    S = Solver(Depot (
+            Point2D(depotPos[0], depotPos[1]),
+            vehicles[0],
+            maxCap[0]
+    ), dataset)
+
+    S.traceRoutes(k)
+    # print("K = "+str(k)+ ' - '+ str(S.global_optimal))
+
+    if(S.global_optimal < global_optimal):
+        best_skip = k
+        global_optimal = S.global_optimal
+
+S = Solver(Depot (
+            Point2D(depotPos[0], depotPos[1]),
+            vehicles[0],
+            maxCap[0]
+    ), dataset)
+S.traceRoutes(best_skip)
+print('Best Skip: '+ str(best_skip))
+print('Best Solution: '+ str(S.global_optimal))
+S.depot.reportLoadedUnloaded()
+
+# for s in S.all_solutions:
+#     print(s)
+
+
+
+# sol.append(depot.reportLoadedUnloaded())
+'''
+if(not isDone):
+    print("There is missing customers. Result needs to be optimized.\n")
+    for line in depot._distMatrix:
+        print(line)
+for v in range(0, depot.vehicles.__len__()):
+    print("\nVeículo " + str(v) + str(depot.vehicles[v].route) + '\n')
+
+'''
