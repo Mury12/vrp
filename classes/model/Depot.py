@@ -12,7 +12,6 @@ true = True
 class Depot:
     
     pos = []
-
     vehicles = []
     # Usada para calcular as rotas
     customers = []
@@ -21,6 +20,8 @@ class Depot:
     _distMatrix = []
     timeConst = 0
     timeRef1 = 0
+    solRefine = []
+    vezes = 0
 
     def __init__(self, pos, vehicles, cap):
         self.unloaded = false
@@ -60,7 +61,7 @@ class Depot:
         return false
 
     def trace_routes(self, ref):
-        #print("Tracing routes..")
+        print("Tracing routes..")
         i = 0
         #k = k if k > 0 else k + 1
         for i in range(0, self._distMatrix[i].__len__()):
@@ -71,8 +72,8 @@ class Depot:
                     self.customers[_next[0]].unload()
 
                
-        #print(self.vehicles)
-        #print("Routes traced.\n")
+        # print(self.vehicles)
+        # print("Routes traced.\n")
 
         distanceParcial = 0
         for v in self.vehicles:
@@ -80,7 +81,7 @@ class Depot:
             #soma a distancia de volta do veiculo para o depot a partir do ultimo cliente
             distanceVolta = v.route[-1][0].pos.distanceTo(Point2D(float(self.pos.x),float(self.pos.y)))
             distanceParcial += distanceVolta
-        #print("\nDistância total da solução: \n" + str(distanceParcial) + '\n')
+        print(f"\nDistância total da solução: {distanceParcial:.2f}\n")
         #print("Tempo de execução com a heurística construtiva: " + str(self.timeConst) + '\n')
         #se for escolhido usar o método de refinamento de trocas...
 
@@ -92,22 +93,37 @@ class Depot:
 
         if(ref == 1):
             #print("entrou no refinamento")
-            self._change_refine(4) #alterar aq o envio da optimization rate and seed (seria bom um dps
+            self._change_refine(4, self.vehicles) #alterar aq o envio da optimization rate and seed (seria bom um dps
             #colocarmos um input())
+            _rota = 9999
+            _melhorRota = 0
+            for rou in self.solRefine:
+                _distanceParcial = 0
+                for v in rou:
+                    _distanceParcial += v.getTotalDistance()  # soma a distancia percorrido pelo veiculo
+                    print(_distanceParcial)
+                    # soma a distancia de volta do veiculo para o depot a partir do ultimo cliente
+                    _distanceVolta = v.route[-1][0].pos.distanceTo(Point2D(float(self.pos.x), float(self.pos.y)))
+                    _distanceParcial += _distanceVolta
+                print("Distancias " + str(_distanceParcial))
+                if (_distanceParcial < _rota):
+                    _rota = distanceParcial
+                    _melhorRota = rou
+            self.vehicles = _melhorRota
             distanceParcial = 0
             for v in self.vehicles:
                 distanceParcial += v.getTotalDistance() #soma a distancia percorrido pelo veiculo
                 #soma a distancia de volta do veiculo para o depot a partir do ultimo cliente 
                 distanceVolta = v.route[-1][0].pos.distanceTo(Point2D(float(self.pos.x),float(self.pos.y)))
                 distanceParcial += distanceVolta
-            '''print("\nNew routes traceds...\n")
+            print("\nNew routes traceds...\n")
             print(self.vehicles)
-            print("\nRoutes traced.")'''
-            print(str(distanceParcial))
+            print("\nRoutes traced.")
+            print("Nova solução  " + str(distanceParcial))
             #print("Tempo de execução com a heurística refinamento: " + str(self.timeRef1) +'\n')
 
         return false
-        
+
     def _get_minor_distance_index(self, curPos, k):
         timeStart = time.time()
         _next = 9999
@@ -153,51 +169,50 @@ class Depot:
 
         return _result
 
-    def _change_refine(self, ot):
+    def _change_refine(self, ot, vehicles):
         timeStart = time.time() #time start do método de refinamento
         i = 0 #Optimization rates = Quantidade de veículos q serão refinados (os veículos q percorrem maior distância)
         _midx = [] #list q armazena o indice real dos veículos em self.vehicles
         _idx = 0 #indice q identifica o veiculo q passou apresentar ter maior distancia percorrida (pior)
         cloneVehicles = self.vehicles
         worstRoutes = [] #list q armazena os piores veiculos
-        while i < ot: #para a qtde veiculos q deverá ser refeito
-            j = 0
-            _next = 0
-            for v in cloneVehicles:
-                #algoritmo para encontrar o pior veiculo
-                if v.distRan > _next:
-                    _next = v.distRan
-                    _idx = j
-                j += 1
-            _midx.append(_idx) #registro o indice do pior veiculo encontrado
-            worstRoutes.append(cloneVehicles[_idx]) #insere o pior veiculo na lista de piores veiculos
-            cloneVehicles[_idx].distRan = 0
-            i += 1
-        
-        for c in worstRoutes:
-            for w in range (0,int(c.route.__len__()/2)):
-                x = randint(0, c.route.__len__()-1)
-                customer1 = c.route[w]
-                customer2 = c.route[x]
-                c.route.insert(w, customer2)
-                c.route.__delitem__(w+1)
-                c.route.insert(x, customer1)
-                c.route.__delitem__(x+1)
-            c.distRan = self._recalculate_distance(c)
-        
-        sum = 0 #soma da distancia total com o refinamento das piores rotas
-        for c in worstRoutes:
-            #print(c.distRan)
-            sum += c.distRan
-        
-        #print("Soma da distância total das rotas que foram refinadas -> " + str(sum))
-        for i in range (0,_midx.__len__()):
-            self.vehicles[_midx[i]].distRan = worstRoutes[i].distRan #atualiza o distRan da pior rota 
-            #self.vehicles.insert(_midx[i], worstRoutes[i])
-            #self.vehicles.__delitem__(_midx[i]+1)
+        if self.vezes < 15:
+            while i < self.vehicles.__len__(): #para a qtde veiculos q deverá ser refeito
+                j = 0
+                _next = 0
+                for v in cloneVehicles:
+                    #algoritmo para encontrar o pior veiculo
+                    if v.distRan > _next:
+                        _next = v.distRan
+                        _idx = j
+                    j += 1
+                _midx.append(_idx) #registro o indice do pior veiculo encontrado
+                worstRoutes.append(cloneVehicles[_idx]) #insere o pior veiculo na lista de piores veiculos
+                cloneVehicles[_idx].distRan = 0
+                i += 1
 
-        timeEnd = time.time() #calc tempod e execução do método de refinamento
-        self.timeRef1 = timeEnd - timeStart
+            for c in worstRoutes:
+                for w in range (1,int(c.route.__len__()/2+1)):
+                    x = randint(0, c.route.__len__()-1)
+                    customer1 = c.route[w]
+                    customer2 = c.route[x]
+                    c.route.insert(w, customer2)
+                    c.route.__delitem__(w+1)
+                    c.route.insert(x, customer1)
+                    c.route.__delitem__(x+1)
+                c.distRan = self._recalculate_distance(c)
+
+            for i in range (0,_midx.__len__()):
+                self.vehicles[_midx[i]].distRan = worstRoutes[i].distRan #atualiza o distRan da pior rota 
+                self.vehicles.insert(_midx[i], worstRoutes[i])
+                self.vehicles.__delitem__(_midx[i]+1)
+
+            self.solRefine.append(worstRoutes)
+            print(str(self.solRefine[0]))
+            self.vezes = self.vezes + 1
+            timeEnd = time.time() #calc tempod e execução do método de refinamento
+            self.timeRef1 = timeEnd - timeStart
+            self._change_refine(4, worstRoutes)
 
     def _recalculate_distance(self, vec):
         newDistRan = 0 #distancia inicial do recalculo da rota
@@ -242,12 +257,12 @@ class Depot:
         unloaded = []
         for c in self.customers:
             loaded += 1 if not c.loaded else 0
-            if(c.loaded):
+            if c.loaded:
                 unloaded.append(c)
         
         print(" Unloaded customers: " + str(loaded))
         print(" Total customers: " + str(self.customers.__len__()-1))
-        if(unloaded.__len__() > 0):
+        if unloaded.__len__() > 0:
             print(" Missing customers: ")
             print(unloaded)
             self.unloaded = true

@@ -1,4 +1,5 @@
-from classes.model.Point2D  import *
+from classes.model.Point2D import *
+
 
 class Customer:
 
@@ -21,4 +22,4 @@ class Customer:
         return self.pos
 
     def __repr__(self):
-        return "".join(["Customer ", str(self.id), ": ", str(self.pos), ", Demand: ", str(self.demand)])
+        return "".join(["Customer ", str(self.id), " - ", str(self.pos), ", Demand: ", str(self.demand)])
