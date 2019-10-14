@@ -79,22 +79,21 @@ class Depot:
             print(item)
             print("\n")
 
-    def reportLoadedUnloaded(self):
+    def reportLoadedUnloaded(self, verb = false):
         loaded = -1
         unloaded = []
         for c in self.customers:
             loaded += 1 if not c.loaded else 0
             if(c.loaded):
                 unloaded.append(c)
-        
-        print(" Unloaded customers: " + str(loaded))
-        print(" Total customers: " + str(self.customers.__len__()-1))
+        if verb:
+            print(" Unloaded customers: " + str(loaded))
+            print(" Total customers: " + str(self.customers.__len__()-1))
         if(unloaded.__len__() > 0):
-            print(" Missing customers: ")
-            print(unloaded)
-            self.unloaded = true
+            if verb:
+                print(" Missing customers: ")
+                print(unloaded)
+            return false
         else:
-            self.unloaded = false
-
-        return self.unloaded
+            return true
         
