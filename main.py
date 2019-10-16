@@ -60,6 +60,11 @@ print('Best Skip: '+ str(best_skip))
 print('Best Solution: '+ str(S.global_optimal))
 S.depot.reportLoadedUnloaded()
 
+S._methodGLS()
+print('Best Skip: '+ str(best_skip))
+print('Best Solution: '+ str(S.global_optimal))
+S.depot.reportLoadedUnloaded()
+
 # for s in S.all_solutions:
 #     print(s)
 

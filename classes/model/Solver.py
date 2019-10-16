@@ -27,18 +27,16 @@ class Solver:
 
         distanceParcial = 0
         for v in self.depot.vehicles:
-            distanceParcial += v.getTotalDistance() #soma a distancia percorrido pelo veiculo
-            #soma a distancia de volta do veiculo para o depot a partir do ultimo cliente
+            distanceParcial += v.getTotalDistance() 
             distanceVolta = v.route[-1][0].pos.distanceTo(Point2D(float(self.depot.pos.x),float(self.depot.pos.y)))
             distanceParcial += distanceVolta
 
 
         if(1):
-            self._refine('by change', 4) #alterar aq o envio da optimization rate and seed (seria bom um dps 
+            self._refine('by change', 4, self.depot.vehicles)
             distanceParcial = 0
             for v in self.depot.vehicles:
-                distanceParcial += v.getTotalDistance() #soma a distancia percorrido pelo veiculo
-                #soma a distancia de volta do veiculo para o depot a partir do ultimo cliente 
+                distanceParcial += v.getTotalDistance() 
                 distanceVolta = v.route[-1][0].pos.distanceTo(Point2D(float(self.depot.pos.x),float(self.depot.pos.y)))
                 distanceParcial += distanceVolta
 
@@ -81,18 +79,18 @@ class Solver:
         
         return _result
 
-    def _refine(self, type, param):
+    def _refine(self, type, param, vehicles):
         if type == 'by change':
-            self._refine_by_change(param)
+            self._refine_by_change(param, vehicles)
 
 
 
-    def _refine_by_change(self, routes_to_change):
+    def _refine_by_change(self, routes_to_change, vehicles):
         timeStart = time.time() #time start do método de refinamento
         i = 0 #Optimization rates = Quantidade de veículos q serão refinados (os veículos q percorrem maior distância)
         _idx = 0 #indice q identifica o veiculo q passou apresentar ter maior distancia percorrida (pior)
         _idx_list = [] #list q armazena o indice real dos veículos em self.vehicles
-        cloneVehicles = self.depot.vehicles
+        cloneVehicles = vehicles
         worstRoutes = [] #list q armazena as piores rotas
 
         while i < routes_to_change: #para a qtde veiculos q deverá ser refeito
@@ -128,11 +126,32 @@ class Solver:
         #print("Soma da distância total das rotas que foram refinadas -> " + str(sum))
         for i in range (0,_idx_list.__len__()):
             self.depot.vehicles[_idx_list[i]].distRan = worstRoutes[i].distRan #atualiza o distRan da pior rota 
-            #self.vehicles.insert(_idx_list[i], worstRoutes[i])
-            #self.vehicles.__delitem__(_idx_list[i]+1)
+            self.depot.vehicles.insert(_idx_list[i], worstRoutes[i])
+            self.depot.vehicles.__delitem__(_idx_list[i]+1)
 
         timeEnd = time.time() #calc tempod e execução do método de refinamento
         self.timeRef1 = timeEnd - timeStart
+
+
+    def _methodGLS(self,):
+        p = 2.0
+        solution = self.depot.vehicles
+        bs = self._applyPenalty(solution, p)
+        optimalSolution = solution
+        for i in range(0, 30):
+            p += 0.1
+            self._refine('by change', 4, solution)
+            solution = self.depot.vehicles
+            newSolution = self._applyPenalty(solution, p)
+            if(newSolution < bs):
+                bs = newSolution
+                optimalSolution = solution
+        bestSolution = self._applyPenalty(optimalSolution, 2.0)
+        print("Solução GLS: " + str(bestSolution))
+        print("Rota" + str(optimalSolution))
+            
+            
+
 
     def _recalcDistanc(self, vec):
         newDistRan = 0 #distancia inicial do recalculo da rota
@@ -144,6 +163,15 @@ class Solver:
             newDistRan += self.depot.distanceBetween(pointActual, pointNext)
         return newDistRan
 
-
+    def _applyPenalty(self, sol, p):
+        distanceParcial = 0
+        demandParcial = 0
+        for v in sol:
+            distanceParcial += v.getTotalDistance() 
+            distanceVolta = v.route[-1][0].pos.distanceTo(Point2D(float(self.depot.pos.x),float(self.depot.pos.y)))
+            distanceParcial += distanceVolta
+            demandParcial += v.usedCap
+        print("Solution: " + str(distanceParcial))
+        return float(1+((distanceParcial/demandParcial)/p))
 
     
