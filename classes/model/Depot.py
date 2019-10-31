@@ -22,6 +22,7 @@ class Depot:
         self.distMatrix = []
         self.customers = []
         self._distMatrix = []
+        self.loaded = 0
     
     def createVehicles(self, amount, cap):
         vehicles = []
@@ -82,18 +83,18 @@ class Depot:
     def reportLoadedUnloaded(self, verb = false):
         loaded = -1
         unloaded = []
-        for c in self.customers:
-            loaded += 1 if not c.loaded else 0
-            if(c.loaded):
-                unloaded.append(c)
         if verb:
-            print(" Unloaded customers: " + str(loaded))
-            print(" Total customers: " + str(self.customers.__len__()-1))
-        if(unloaded.__len__() > 0):
-            if verb:
-                print(" Missing customers: ")
-                print(unloaded)
-            return false
+            for c in self.customers:
+                loaded += 1 if not c.loaded else 0
+                if(c.loaded):
+                    unloaded.append(c)
+                print(" Unloaded customers: " + str(loaded))
+                print(" Total customers: " + str(self.customers.__len__()-1))
+            if(unloaded.__len__() > 0):
+                if verb:
+                    print(" Missing customers: ")
+                    print(unloaded)
+                return false
         else:
-            return true
+            return self.loaded == self.customers.__len__()
         

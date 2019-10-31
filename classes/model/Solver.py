@@ -19,12 +19,13 @@ class Solver:
         if method == 'gls':
             depot = self._guidedLocalSearch(choose_best_skip, refinement)
 
-        self.completed = depot.reportLoadedUnloaded()
+
+        # self.completed = depot.reportLoadedUnloaded()
         
         return false
         
 
-    def _initialSolution(self, depot,  refinement, skip = 0):
+    def _initialSolution(self, depot,  refinement, skip = 2):
         i=0
         
         depot.bulkAddCustomer(self.dataset)
@@ -67,7 +68,8 @@ class Solver:
             depot = self._initialSolution(
                 Depot(
                     Point2D(depotPos[0], depotPos[1]),
-                    vehicles[0],maxCap[0]),
+                    vehicles[0],maxCap[0]
+                    ),
                     refinement,
                     i
                 ) 
@@ -98,8 +100,7 @@ class Solver:
                 Depot(
                     Point2D(depotPos[0], depotPos[1]),
                     vehicles[0],maxCap[0]),
-                    refinement,
-                    i
+                    refinement
                 )
             if self.global_optimal < global_optimal and self.completed:
                 best_skip = i
@@ -110,7 +111,6 @@ class Solver:
         
         self.best_skip = best_skip
         self.global_optimal = global_optimal
-
         return best_depot
 
     def _getMinorDistanceIndex(self, depot, curPos, skip):

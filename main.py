@@ -3,21 +3,22 @@ import sys
 from classes.model.Parser import *
 from classes.model.Depot import *
 from classes.model.Solver import *
+from classes.model.ACO import *
 parser = Parser()
 i=0
 sol = []
 
-i = sys.argv[1]
-parse = false
-if len(sys.argv) == 3 and sys.argv[2] == 'parse':
-    print('parsing file')
-    parser.parse()
-    print('file parsed')
+# i = sys.argv[1]
+# parse = false
+# if len(sys.argv) == 3 and sys.argv[2] == 'parse':
+#     print('parsing file')
+#     parser.parse()
+#     print('file parsed')
 
 dataset = parser.fileToMatrix(1)
 
 
-seed(i)
+seed(10)
 
 
 
@@ -29,9 +30,13 @@ seed(i)
 # print(depot.vehicles[1].route)
 
 S = Solver(dataset)
-
 S.traceRoutes('gls', true, true)
-# print('Best Skip: '+ str(S.best_skip))
+
+# ants = ACO(dataset)
+# ants._configure()
+# ants.start()
+
+print('Best Skip: '+ str(S.best_skip))
 print(str(S.global_optimal))
 # S.depot.reportLoadedUnloaded(true)
 
