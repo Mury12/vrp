@@ -54,7 +54,7 @@ class Solver:
             returnDistance = v.route[-1][0].pos.distanceTo(Point2D(float(depot.pos.x),float(depot.pos.y)))
             partialDistance += returnDistance
                        
-            self.global_optimal = partialDistance
+        self.global_optimal = partialDistance
         return depot
 
     def _guidedLocalSearch(self, choose_best_skip = false, refinement = false):
@@ -100,7 +100,8 @@ class Solver:
                 Depot(
                     Point2D(depotPos[0], depotPos[1]),
                     vehicles[0],maxCap[0]),
-                    refinement
+                    refinement,
+                    i
                 )
             if self.global_optimal < global_optimal and self.completed:
                 best_skip = i

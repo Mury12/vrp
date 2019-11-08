@@ -83,6 +83,7 @@ class Depot:
     def reportLoadedUnloaded(self, verb = false):
         loaded = -1
         unloaded = []
+        
         if verb:
             for c in self.customers:
                 loaded += 1 if not c.loaded else 0
@@ -96,5 +97,5 @@ class Depot:
                     print(unloaded)
                 return false
         else:
-            return self.loaded == self.customers.__len__()
+            return int(self.loaded == self.customers.__len__() - 1)
         

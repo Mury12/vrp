@@ -1,4 +1,5 @@
 from classes.model.Solver import *
+import copy
 
 false = False
 true  = True
@@ -7,23 +8,28 @@ class ACO:
 
     def __init__(self, dataset, max_iteration = 1000):
         self.max_iteration = max_iteration
+        self.not_improved = int(max_iteration/10) if max_iteration > 100 else 10
+        self.iterations_used = 0
         self.dataset = dataset
         self.completed = false
         self.solutions = []
         self.pheromon = []
+        self.updated_pheromon = []
         self.ants = 0
+        self.global_optimal = 0
 
     def _configure(self):
 
         self.S = Solver(self.dataset)
-        
         self.maxCap = self.dataset.pop(0)
         self.vehicles = self.dataset.pop(0)
         self.depotPos = self.dataset[0]
 
-        self.ants = int((int(self.dataset.__len__()) / int(self.vehicles[0]))*1)
+        self.pheromon = self._zeroedPheromoneMatrix()        
+        self.updated_pheromon = self._zeroedPheromoneMatrix()        
+        self.ants = int((int(self.dataset.__len__()) / int(self.vehicles[0]))*3)
 
-        print('Ants used: ' + str(self.ants))
+        # print('Ants used: ' + str(self.ants))
 
 
     def _zeroedPheromoneMatrix(self):
@@ -36,26 +42,33 @@ class ACO:
             matrix.append(v)
         return matrix
 
-    def _updatePheromoneMatrix(self, i, j, add, amount = 0.3):
+    def _updatePheromoneMatrix(self, i, j, add, amount = 0.5):
 
         if not add:
-            self.pheromon[i][j] -= 0.1 if pheromon[i][j] > 0 else 0
-            self.pheromon[j][i] -= 0.1 if pheromon[i][j] > 0 else 0
+            for i in range (0, self.updated_pheromon.__len__() - 1):
+                for j in range (0, self.updated_pheromon[i].__len__() - 1):
+                    if self.updated_pheromon[i][j] > 0.2:
+                        self.updated_pheromon[i][j] -= 0.2
+                    else: self.updated_pheromon[i][j] = 0
         else:
-            self.pheromon[i][j] += amount
-            self.pheromon[j][i] += amount
+            if(self.updated_pheromon[i][j] > 0):
+                self.updated_pheromon[i][j] += amount/2
+                self.updated_pheromon[j][i] += amount/2
+            else:
+                self.updated_pheromon[i][j] += amount
+                self.updated_pheromon[j][i] += amount
         return;
 
 
-    def _initialSolution(self, depot,  refinement, skip = 0):
+    def run(self, depot,  refinement, skip = 0):
         i=0
         
         depot.bulkAddCustomer(self.dataset)
 
-        for i in range (0, depot._distMatrix[i].__len__()):
+        for i in range (skip, depot._distMatrix[i].__len__() - 1):
             for v in depot.vehicles:
                 _next = self._getPheromoneFactorIndex(depot, v.pos, skip)
-                if(v.addCustomer(depot.customers[_next[0]], _next[1])):
+                if(_next and v.addCustomer(depot.customers[_next[0]], _next[1])):
                     depot.customers[_next[0]].unload()
                     depot.loaded += 1
                     self._updatePheromoneMatrix(i, v.pos, true)
@@ -70,56 +83,69 @@ class ACO:
         _idx = 0
         _next = 9999
         _skipped = 0;
-        for i in range (0, self.pheromon[curPos].__len__()):
 
-            _factor = (depot._distMatrix[curPos][i] / self.pheromon[curPos][i]) if self.pheromon[curPos][i] > 0 else depot._distMatrix[curPos][i]
+        _pheromon_row = list(self.pheromon[curPos])
+        _distance_row = list(depot._distMatrix[curPos])
+        _pheromon_row.insert(0, _pheromon_row.pop(skip))
+        _distance_row.insert(0, _distance_row.pop(skip))
+
+        for i in range (0, _pheromon_row.__len__()):
             
-            if(_factor < factor and depot._distMatrix[curPos][i] > 0 and depot.customers[i].loaded ):
-                    factor = _factor
-                    _idx   = i
-                    _next  = depot._distMatrix[curPos][i]
+            _factor = (_distance_row[i] - _pheromon_row[i]) 
 
+            if(_factor < factor and depot.customers[i].loaded and _distance_row[i] > 0):
+                factor = _factor
+                _idx   = i
+                _next  = _distance_row[i]
 
         _result = []
         _result.append(_idx)
         _result.append(_next)
+        if _next == 9999: _result = false
         return  _result
 
-    def start(self):
-        k=0
-
-
-        self.pheromon = self._zeroedPheromoneMatrix()
-        completed = false
-
-        k = 0
+    def _releaseAntColony(self):
         for j in range (0, self.ants):
-            for i in range (0, self.dataset.__len__()):
-                depot = self._initialSolution(
+            for i in range (j if j < self.dataset.__len__() else 0, self.dataset.__len__()):
+                depot = self.run(
                     Depot(
                         Point2D(self.depotPos[0], self.depotPos[1]),
                         self.vehicles[0],self.maxCap[0]),
                         true,
-                        0
+                        randint(0, self.dataset.__len__() - 5)
                     )
                 completed = depot.reportLoadedUnloaded()
 
                 # print (i)
-                if completed: 
+                if completed:
                     sol = []
                     sol.append(depot)
                     sol.append(self.S.global_optimal)
                     self.solutions.append(sol)
-                    print(sol[1])
+                    if sol[1] < self.solutions[self.global_optimal][1]:
+                        self.global_optimal = self.solutions.__len__() - 1
+                        # print(sol[1])
+
                     break
 
-        # depot.reportLoadedUnloaded(true)
-        # for item in self.pheromon:
-        #     print (item)
 
-        for item in self.solutions:
-            print(item[1])
-            # print(item[0].reportLoadedUnloaded(true))
+        self._updatePheromoneMatrix(0,0,false)
+        self.pheromon = copy.deepcopy(self.updated_pheromon)
+
+    def start(self):
+
+        k=0
+        completed = false
+
+        improved = 0
+        
+        for k in range (0, self.max_iteration):
+            
+            self._releaseAntColony()
+            
+            
+        self.global_optimal = self.solutions[self.global_optimal]
+        # print("MELHOR SOLUCAO: "+str(self.solutions[self.global_optimal][1]))
 
         return
 
