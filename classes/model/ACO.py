@@ -27,7 +27,7 @@ class ACO:
 
         self.pheromon = self._zeroedPheromoneMatrix()        
         self.updated_pheromon = self._zeroedPheromoneMatrix()        
-        self.ants = int((int(self.dataset.__len__()) / int(self.vehicles[0]))*3)
+        self.ants = int(self.vehicles[0])*2
 
         # print('Ants used: ' + str(self.ants))
 
@@ -134,18 +134,11 @@ class ACO:
 
     def start(self):
 
-        k=0
-        completed = false
-
-        improved = 0
-        
         for k in range (0, self.max_iteration):
             
             self._releaseAntColony()
             
-            
         self.global_optimal = self.solutions[self.global_optimal]
-        # print("MELHOR SOLUCAO: "+str(self.solutions[self.global_optimal][1]))
 
         return
 

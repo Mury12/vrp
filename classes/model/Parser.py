@@ -1,18 +1,18 @@
 import re
-
+import os.path
 class Parser:
 
     def __init__(self):
         return
         
-    def parse(self):
+    def parse(self, file):
         i = 0
         rows = []
         node_section = False
         demand_section = False
         depot_section = False
-        for i in range(1, 2):
-            f = open('plain/fixed'+str(i)+'.txt', 'r')
+        f = open('plain/'+file+'.txt', 'r')
+        if f and not os.path.exists('plain/ready/'+file+'.txt'):
             for line in f:
                 if(re.findall(r"NODE_COORD_SECTION", line)):
                     node_section = True
@@ -28,7 +28,7 @@ class Parser:
 
                 if(re.findall(r"CAPACITY", line) 
                     or re.findall(r"VEHICLES", line)):
-                        _f = open('plain/ready/fixed'+str(i)+'.txt', 'a')
+                        _f = open('plain/ready/'+file+'.txt', 'a')
                         _f.write(line.split()[1]+'\n')
                         _f.close()
 
@@ -44,21 +44,21 @@ class Parser:
                     #print(row)
                     rows[int(idx)-1].append(row[0])
                 if(depot_section):
-                    _f = open('plain/ready/fixed'+str(i)+'.txt', 'a+')
+                    _f = open('plain/ready/'+file+'.txt', 'a+')
                     depot = line.split()
                     depot.append(0)
                     _f.write(" ".join(str(el) for el in depot) + '\n')
                     _f.close()
                     break
             for row in rows:
-                _f = open('plain/ready/fixed'+str(i)+'.txt', 'a+')
+                _f = open('plain/ready/'+file+'.txt', 'a+')
                 _f.write(" ".join(str(el) for el in row) + '\n')
                 _f.close()   
 
             f.close()
 
-    def fileToMatrix(self, fileNumber):
-        _f = open('plain/ready/fixed'+str(fileNumber)+'.txt', 'r')
+    def fileToMatrix(self, file):
+        _f = open('plain/ready/'+file+'.txt', 'r')
         dataset = []
         if(_f):
             for line in _f:

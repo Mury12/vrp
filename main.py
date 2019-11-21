@@ -12,16 +12,17 @@ sol = []
 
 i = sys.argv[1]
 parse = false
-if len(sys.argv) == 3 and sys.argv[2] == 'parse':
-    print('parsing file')
-    parser.parse()
-    print('file parsed')
-
-dataset = parser.fileToMatrix(1)
+if len(sys.argv) == 4 and sys.argv[2] == 'parse':
+    # print('parsing file '+ sys.argv[3])
+    parser.parse(sys.argv[3])
+    # print('file parsed')
+    dataset = parser.fileToMatrix(sys.argv[3])
+else:
+    dataset = parser.fileToMatrix(sys.argv[2])
 
 seed(i)
 
-ants = ACO(dataset, 200)
+ants = ACO(dataset, 150)
 ants._configure()
 reference = time.time()
 ants.start()
