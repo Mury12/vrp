@@ -35,7 +35,7 @@ isDone = depot.traceRoutes(1)
 # print(depot.vehicles[1].route)
 
 sol.append(depot.reportLoadedUnloaded())
-'''
+'''=
 if(not isDone):
     print("There is missing customers. Result needs to be optimized.\n")
     for line in depot._distMatrix:

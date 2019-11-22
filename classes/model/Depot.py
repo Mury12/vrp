@@ -80,6 +80,7 @@ class Depot:
             distanceParcial += distanceVolta
         #print("\nDistância total da solução: \n" + str(distanceParcial) + '\n')
         #print("Tempo de execução com a heurística construtiva: " + str(self.timeConst) + '\n')
+        print('Heuristica: ' + str(distanceParcial) + ', ' + str(self.timeConst*100))
         #se for escolhido usar o método de refinamento de trocas...
 
         #verifica se existe uma solução para o problema, caso n exista o k é iterado e o programa 
@@ -101,8 +102,9 @@ class Depot:
             '''print("\nNew routes traceds...\n")
             print(self.vehicles)
             print("\nRoutes traced.")'''
-            print(str(distanceParcial))
+            #print(str(distanceParcial))
             #print("Tempo de execução com a heurística refinamento: " + str(self.timeRef1) +'\n')
+            print("Heurística + Refinamento: " + str(distanceParcial) + ', ' + str(self.timeRef1*100 + self.timeConst*100) + ', ' + str(self.timeRef1*100))
 
         return false
         
@@ -236,21 +238,21 @@ class Depot:
             print("\n")
 
     def reportLoadedUnloaded(self):
-        '''loaded = -1
+        loaded = -1
         unloaded = []
         for c in self.customers:
             loaded += 1 if not c.loaded else 0
             if(c.loaded):
                 unloaded.append(c)
         
-        print(" Unloaded customers: " + str(loaded))
-        print(" Total customers: " + str(self.customers.__len__()-1))
+        #print(" Unloaded customers: " + str(loaded))
+        #print(" Total customers: " + str(self.customers.__len__()-1))
         if(unloaded.__len__() > 0):
             print(" Missing customers: ")
             print(unloaded)
             self.unloaded = true
         else:
-            self.unloaded = false'''
+            self.unloaded = false
 
         return self.vehicles
         
