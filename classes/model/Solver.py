@@ -4,6 +4,12 @@ true = True
 false = False
 
 class Solver:
+    timeConst = 0
+    timeRef1 = 0
+    timeGLS = 0
+    solHeuristic = 9999
+    solRef = 9999
+    solGLS = 9999
 
     def __init__(self, depot, dataset):
         
@@ -31,6 +37,8 @@ class Solver:
             distanceVolta = v.route[-1][0].pos.distanceTo(Point2D(float(self.depot.pos.x),float(self.depot.pos.y)))
             distanceParcial += distanceVolta
 
+        self.solHeuristic = distanceParcial
+        #print("Heurística:" + str(distanceParcial) + ', ' + str(self.timeConst*100))
 
         if(1):
             self._refine('by change', 4, self.depot.vehicles)
@@ -43,7 +51,9 @@ class Solver:
             # print(str(distanceParcial))
             self.all_solutions.append(distanceParcial)
             self.global_optimal = distanceParcial
+            self.solRef = distanceParcial
             #print("Tempo de execução com a heurística refinamento: " + str(self.timeRef1) +'\n')
+            #print("Heurística + Refinamento: " + str(distanceParcial) + ', ' + str(self.timeRef1*100 + self.timeConst*100) + ', ' + str(self.timeRef1*100))
 
         return false
         
@@ -75,7 +85,7 @@ class Solver:
         _result.append(_next)
 
         timeEnd = time.time()
-        self.depot.timeConst += timeEnd - timeStart
+        self.timeConst += timeEnd - timeStart
         
         return _result
 
@@ -134,21 +144,27 @@ class Solver:
 
 
     def _methodGLS(self,):
+        timeStart = time.time()
         p = 2.0
         solution = self.depot.vehicles
-        bs = self._applyPenalty(solution, p)
+        bs = self._applyPenalty(solution, p, 0)
         optimalSolution = solution
         for i in range(0, 30):
             p += 0.1
             self._refine('by change', 4, solution)
             solution = self.depot.vehicles
-            newSolution = self._applyPenalty(solution, p)
+            newSolution = self._applyPenalty(solution, p, 0)
             if(newSolution < bs):
                 bs = newSolution
                 optimalSolution = solution
-        bestSolution = self._applyPenalty(optimalSolution, 2.0)
-        print("Solução GLS: " + str(bestSolution))
-        print("Rota" + str(optimalSolution))
+        #bestSolution = self._applyPenalty(optimalSolution, 2.0, 0)
+        #print("Solução GLS: " + str(bestSolution))
+        distanceOptimalSolution = self._applyPenalty(optimalSolution, 2.0, 1)
+        #print(distanceOptimalSolution)
+        self.solGLS = distanceOptimalSolution
+        #print(str(self._recalcDistanc(bs)))
+        timeEnd = time.time() #calc tempod e execução do método de refinamento
+        self.timeGLS = timeEnd - timeStart
             
             
 
@@ -163,7 +179,7 @@ class Solver:
             newDistRan += self.depot.distanceBetween(pointActual, pointNext)
         return newDistRan
 
-    def _applyPenalty(self, sol, p):
+    def _applyPenalty(self, sol, p, distance):
         distanceParcial = 0
         demandParcial = 0
         for v in sol:
@@ -171,7 +187,9 @@ class Solver:
             distanceVolta = v.route[-1][0].pos.distanceTo(Point2D(float(self.depot.pos.x),float(self.depot.pos.y)))
             distanceParcial += distanceVolta
             demandParcial += v.usedCap
-        print("Solution: " + str(distanceParcial))
+        #print("Solution: " + str(distanceParcial))
+        if(distance == 1):
+            return distanceParcial
         return float(1+((distanceParcial/demandParcial)/p))
 
     

@@ -56,27 +56,17 @@ S = Solver(Depot (
             maxCap[0]
     ), dataset)
 S.traceRoutes(best_skip)
-print('Best Skip: '+ str(best_skip))
-print('Best Solution: '+ str(S.global_optimal))
-S.depot.reportLoadedUnloaded()
+#print(str(S.solHeuristic) + ';' + str(S.timeConst*100))
+#print(str(S.solRef) + ';' + str((S.timeConst + S.timeRef1) * 100))
+#print('Best Skip: '+ str(best_skip))
+#print('Best Solution: '+ str(S.global_optimal))
+#S.depot.reportLoadedUnloaded()
 
 S._methodGLS()
-print('Best Skip: '+ str(best_skip))
-print('Best Solution: '+ str(S.global_optimal))
-S.depot.reportLoadedUnloaded()
-
-# for s in S.all_solutions:
-#     print(s)
-
-
-
-# sol.append(depot.reportLoadedUnloaded())
-'''
-if(not isDone):
-    print("There is missing customers. Result needs to be optimized.\n")
-    for line in depot._distMatrix:
-        print(line)
-for v in range(0, depot.vehicles.__len__()):
-    print("\nVeículo " + str(v) + str(depot.vehicles[v].route) + '\n')
-
-'''
+#print(str(S.solGLS) + ';' + str(S.timeGLS*100))
+#print('Best Skip: '+ str(best_skip))
+#print('Best Solution: '+ str(S.global_optimal))
+#S.depot.reportLoadedUnloaded()
+print(str(i) + ';'+ str(S.solHeuristic) + ';' + str(S.timeConst) + ';' + 
+str(S.solRef) + ';' + str(S.timeConst + S.timeRef1) + ';' +
+str(S.solGLS) + ';' + str(S.timeGLS))

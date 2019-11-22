@@ -28,7 +28,7 @@ class Parser:
 
                 if(re.findall(r"CAPACITY", line) 
                     or re.findall(r"VEHICLES", line)):
-                        _f = open('plain/ready/fixed'+str(i)+'.txt', 'a')
+                        _f = open('plain/ready/GOLD421.41.txt', 'a')
                         _f.write(line.split()[1]+'\n')
                         _f.close()
 
@@ -44,21 +44,21 @@ class Parser:
                     #print(row)
                     rows[int(idx)-1].append(row[0])
                 if(depot_section):
-                    _f = open('plain/ready/fixed'+str(i)+'.txt', 'a+')
+                    _f = open('plain/ready/GOLD421.41.txt', 'a+')
                     depot = line.split()
                     depot.append(0)
                     _f.write(" ".join(str(el) for el in depot) + '\n')
                     _f.close()
                     break
             for row in rows:
-                _f = open('plain/ready/fixed'+str(i)+'.txt', 'a+')
+                _f = open('plain/ready/GOLD421.41.txt', 'a+')
                 _f.write(" ".join(str(el) for el in row) + '\n')
                 _f.close()   
 
             f.close()
 
     def fileToMatrix(self, fileNumber):
-        _f = open('plain/ready/fixed'+str(fileNumber)+'.txt', 'r')
+        _f = open('plain/ready/GOLD421.41.txt', 'r')
         dataset = []
         if(_f):
             for line in _f:
