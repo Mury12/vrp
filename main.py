@@ -22,7 +22,7 @@ else:
 
 seed(i)
 
-ants = ACO(dataset, 150)
+ants = ACO(dataset, 59)
 ants._configure()
 reference = time.time()
 ants.start()

@@ -27,7 +27,7 @@ class ACO:
 
         self.pheromon = self._zeroedPheromoneMatrix()        
         self.updated_pheromon = self._zeroedPheromoneMatrix()        
-        self.ants = int(self.vehicles[0])*2
+        self.ants = int(self.vehicles[0]) if self.vehicles.__len__() <= 22 else 22
 
         # print('Ants used: ' + str(self.ants))
 
